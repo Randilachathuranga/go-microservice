@@ -1,0 +1,6 @@
+{
+  "watch": ["."],
+  "ext": "go",
+  "exec": "powershell -Command \"go build -o main.exe main.go; Get-Process -Name main -ErrorAction SilentlyContinue | Stop-Process -Force; ./main.exe\"",
+  "legacyWatch": true
+}
