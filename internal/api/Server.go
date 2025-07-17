@@ -7,13 +7,27 @@ import (
 	"go-ecommerce-app/Config"
 	"go-ecommerce-app/internal/api/rest"
 	"go-ecommerce-app/internal/api/rest/Handlers"
+	"go-ecommerce-app/internal/domain"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func StartServer(config Config.AppConfig) {
 	app := fiber.New() // declare a new Fiber app
 
+	db, err := gorm.Open(postgres.Open(config.Dsn), &gorm.Config{})
+
+	if err != nil {
+		log.Fatalf("failed to connect database", err)
+	}
+	fmt.Println("database connection established", db)
+
+	//run the migration
+	db.AutoMigrate(&domain.User{})
+
 	rh := &rest.RestHandler{
 		App: app,
+		DB:  db,
 	}
 
 	SetupRoutes(rh)

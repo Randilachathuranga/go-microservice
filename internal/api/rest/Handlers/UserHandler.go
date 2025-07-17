@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go-ecommerce-app/internal/api/rest"
 	"go-ecommerce-app/internal/dto"
+	"go-ecommerce-app/internal/repository"
 	"go-ecommerce-app/internal/service"
 )
 
@@ -17,7 +18,9 @@ func SetUpuserRoutes(rh *rest.RestHandler) {
 	app := rh.App
 
 	//create an instance of user service and handler
-	svc := service.USerService{}
+	svc := service.USerService{
+		Repo: repository.NewUserRepository(rh.DB),
+	}
 	handler := UserHandelr{
 		svc: svc,
 	}
@@ -62,8 +65,24 @@ func (h *UserHandelr) Register(ctx *fiber.Ctx) error {
 }
 
 func (h *UserHandelr) Login(ctx *fiber.Ctx) error {
+
+	logininput := dto.UserLoging{}
+	err := ctx.BodyParser(&logininput)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "please provide valid inputs",
+		})
+	}
+
+	token, err := h.svc.Login(logininput.Email, logininput.Password)
+
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{})
+	}
+
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "login",
+		"token":   token,
 	})
 }
 func (h *UserHandelr) Verify(ctx *fiber.Ctx) error {
