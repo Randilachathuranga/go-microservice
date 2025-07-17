@@ -45,6 +45,7 @@ Thumbs.db
 
 # Docker
 docker-compose.override.yml
+docker-compose.yml
 
 # Other project-specific
 main.exe
