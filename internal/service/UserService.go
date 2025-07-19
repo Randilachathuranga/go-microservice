@@ -33,13 +33,16 @@ func (s USerService) Signup(input dto.UserSignUp) (string, error) {
 func (s USerService) Login(email string, password string) (string, error) {
 	user, err := s.Repo.FindUserByEmail(email)
 	if err != nil {
-		return "", err
+		return "", err // user not found
 	}
-	errs := s.Auth.VerifyPassword(password, user.Password)
+
+	// ✅ THIS LINE MUST RUN
+	err = s.Auth.VerifyPassword(password, user.Password)
 	if err != nil {
-		return "", errs
+		return "", err // invalid password
 	}
-	//generate the token
+
+	// ✅ Only generate token if password is valid
 	return s.Auth.GenerateToken(user.ID, user.Email, user.USerType)
 }
 
