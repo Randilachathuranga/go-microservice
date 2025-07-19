@@ -29,10 +29,11 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 }
 
 func (r *userRepository) CreateUser(user domain.User) (domain.User, error) {
-	if err := r.db.Create(&user).Error; err != nil {
+	err := r.db.Create(&user).Error
+	if err != nil {
 		return domain.User{}, err
-		fmt.Println("database connection established", user)
 	}
+	fmt.Println("User successfully saved:", user)
 	return user, nil
 }
 

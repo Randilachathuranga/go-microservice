@@ -1,41 +1,46 @@
 package service
 
 import (
-	"fmt"
 	"go-ecommerce-app/internal/domain"
 	"go-ecommerce-app/internal/dto"
+	"go-ecommerce-app/internal/helper"
 	"go-ecommerce-app/internal/repository"
 	"log"
 )
 
 type USerService struct {
 	Repo repository.UserRepository
+	Auth helper.Auth
 }
 
 // input any == input interface == any parameters
 func (s USerService) Signup(input dto.UserSignUp) (string, error) {
-	log.Println(input)
+	hpassword, err := s.Auth.CreateHashPassword(input.Password)
+	if err != nil {
+		return "", err
+	}
 	user, err := s.Repo.CreateUser(domain.User{
 		Email:    input.Email,
-		Password: input.Password,
 		Phone:    input.Phone,
+		Password: hpassword,
 	})
-
 	//generate token
 	log.Println(user)
-	userInfo := fmt.Sprintln("New user: ", user)
-
-	return userInfo, err
+	return s.Auth.GenerateToken(user.ID, user.Email, user.USerType)
 }
-func (s USerService) Login(email string, password string) (string, error) {
 
+// login
+func (s USerService) Login(email string, password string) (string, error) {
 	user, err := s.Repo.FindUserByEmail(email)
 	if err != nil {
 		return "", err
 	}
-
-	log.Println(user)
-	return user.Email, err
+	errs := s.Auth.VerifyPassword(password, user.Password)
+	if err != nil {
+		return "", errs
+	}
+	//generate the token
+	return s.Auth.GenerateToken(user.ID, user.Email, user.USerType)
 }
 
 func (s USerService) findbyEmail(email string) (domain.User, error) {

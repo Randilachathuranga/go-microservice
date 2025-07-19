@@ -6,6 +6,7 @@ import (
 	"go-ecommerce-app/internal/dto"
 	"go-ecommerce-app/internal/repository"
 	"go-ecommerce-app/internal/service"
+	"log"
 )
 
 type UserHandelr struct {
@@ -20,27 +21,31 @@ func SetUpuserRoutes(rh *rest.RestHandler) {
 	//create an instance of user service and handler
 	svc := service.USerService{
 		Repo: repository.NewUserRepository(rh.DB),
+		Auth: rh.Auth,
 	}
 	handler := UserHandelr{
 		svc: svc,
 	}
 
+	pubRoutes := app.Group("/users")
+
 	//Public endpoint
-	app.Post("/register", handler.Register)
-	app.Post("/login", handler.Login)
+	pubRoutes.Post("/register", handler.Register)
+	pubRoutes.Post("/login", handler.Login)
 
+	pvtRoutes := pubRoutes.Group("/", rh.Auth.Authorize)
 	//private endpoint
-	app.Get("/verify", handler.GetVerificationCode)
-	app.Post("/verify", handler.Verify)
-	app.Post("/Profile", handler.CreateProfile)
-	app.Get("/Profile", handler.GetProfile)
+	pvtRoutes.Get("/verify", handler.GetVerificationCode)
+	pvtRoutes.Post("/verify", handler.Verify)
+	pvtRoutes.Post("/profile", handler.CreateProfile)
+	pvtRoutes.Get("/profile", handler.GetProfile)
 
-	app.Post("/cart", handler.AddtoCart)
-	app.Get("/cart", handler.GetCart)
-	app.Get("/order", handler.GetOrders)
-	app.Get("/order/:id", handler.GetOrder)
+	pvtRoutes.Post("/cart", handler.AddtoCart)
+	pvtRoutes.Get("/cart", handler.GetCart)
+	pvtRoutes.Get("/order", handler.GetOrders)
+	pvtRoutes.Get("/order/:id", handler.GetOrder)
 
-	app.Post("/become-seller", handler.BecomeaSeller)
+	pvtRoutes.Post("/become-seller", handler.BecomeaSeller)
 
 }
 
@@ -56,11 +61,12 @@ func (h *UserHandelr) Register(ctx *fiber.Ctx) error {
 	token, err := h.svc.Signup(user)
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "error on signup",
+			"message": "error on signup or missin token",
 		})
 	}
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": token,
+		"message": "success register",
+		"token":   token,
 	})
 }
 
@@ -101,8 +107,16 @@ func (h *UserHandelr) CreateProfile(ctx *fiber.Ctx) error {
 	})
 }
 func (h *UserHandelr) GetProfile(ctx *fiber.Ctx) error {
+
+	user, err := h.svc.Auth.GetCurrentUser(ctx)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{})
+	}
+	log.Println(user)
+
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Profile",
+		"user":    user,
 	})
 }
 func (h *UserHandelr) AddtoCart(ctx *fiber.Ctx) error {
