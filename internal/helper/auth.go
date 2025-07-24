@@ -166,11 +166,13 @@ func (a Auth) GetCurrentUser(ctx *fiber.Ctx) (domain.User, error) {
 	if user == nil {
 		return domain.User{}, errors.New("user not found in context")
 	}
-
 	userObj, ok := user.(domain.User)
 	if !ok {
 		return domain.User{}, errors.New("invalid user type in context")
 	}
-
 	return userObj, nil
+}
+
+func (a Auth) GenerateCode() (int, error) {
+	return Randomnumbers(6)
 }

@@ -97,6 +97,10 @@ func (h *UserHandelr) Verify(ctx *fiber.Ctx) error {
 	})
 }
 func (h *UserHandelr) GetVerificationCode(ctx *fiber.Ctx) error {
+
+	user, _ := h.svc.Auth.GetCurrentUser(ctx)
+	//create verfification code and update to user profile
+
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "get verification code",
 	})

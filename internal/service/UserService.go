@@ -6,6 +6,7 @@ import (
 	"go-ecommerce-app/internal/helper"
 	"go-ecommerce-app/internal/repository"
 	"log"
+	"time"
 )
 
 type USerService struct {
@@ -53,7 +54,34 @@ func (s USerService) findbyEmail(email string) (domain.User, error) {
 	return user, err
 }
 
+func (s USerService) isverifiedUser(id uint) bool {
+	currentUser, err := s.Repo.FindUserById(id)
+	return err == nil && currentUser.Verified
+}
+
 func (s USerService) GetverificationCode(e domain.User) (int, error) {
+	// if user already verified
+	if s.isverifiedUser(e.ID) {
+		return 0, nil
+	}
+
+	//generate verification code
+	code, err := s.Auth.GenerateCode()
+	if err != nil {
+		return 0, err
+	}
+	//update user
+	user := domain.User{
+		Expiry: time.Now().Add(30 * time.Minute),
+		Code:   code,
+	}
+	_, err = s.Repo.UpdateUser(e.ID, user)
+	if err != nil {
+		return 0, err
+	}
+
+	//return the verification code
+
 	return 0, nil
 }
 
