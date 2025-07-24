@@ -92,19 +92,46 @@ func (h *UserHandelr) Login(ctx *fiber.Ctx) error {
 	})
 }
 func (h *UserHandelr) Verify(ctx *fiber.Ctx) error {
+
+	user, _ := h.svc.Auth.GetCurrentUser(ctx)
+	//request
+	var req dto.VerificationCodeInput
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "please provide valid inputs",
+		})
+	}
+
+	err := h.svc.VerifyCode(user.ID, req.Code)
+
+	if err != nil {
+		log.Println(err)
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Verify",
+		"message": "Verified Successfully",
 	})
 }
+
 func (h *UserHandelr) GetVerificationCode(ctx *fiber.Ctx) error {
 
 	user, _ := h.svc.Auth.GetCurrentUser(ctx)
 	//create verfification code and update to user profile
-
+	code, err := h.svc.GetverificationCode(user)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "error on get verification code",
+		})
+	}
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "get verification code",
+		"data":    code,
 	})
 }
+
 func (h *UserHandelr) CreateProfile(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Create profile",

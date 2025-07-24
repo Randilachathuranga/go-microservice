@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"go-ecommerce-app/internal/domain"
 	"go-ecommerce-app/internal/dto"
 	"go-ecommerce-app/internal/helper"
@@ -62,7 +63,7 @@ func (s USerService) isverifiedUser(id uint) bool {
 func (s USerService) GetverificationCode(e domain.User) (int, error) {
 	// if user already verified
 	if s.isverifiedUser(e.ID) {
-		return 0, nil
+		return 0, errors.New("verification code already used")
 	}
 
 	//generate verification code
@@ -73,21 +74,45 @@ func (s USerService) GetverificationCode(e domain.User) (int, error) {
 	//update user
 	user := domain.User{
 		Expiry: time.Now().Add(30 * time.Minute),
-		Code:   code,
+		Code:   uint(code),
 	}
 	_, err = s.Repo.UpdateUser(e.ID, user)
 	if err != nil {
 		return 0, err
 	}
+	//send SMS
 
 	//return the verification code
-
-	return 0, nil
+	return code, nil
 }
 
 func (s USerService) VerifyCode(id uint, code uint) error {
+	if s.isverifiedUser(id) {
+		log.Println("verified ...")
+		return errors.New("verification code already used")
+	}
+
+	user, err := s.Repo.FindUserById(id)
+	if err != nil {
+		return errors.New("user not found")
+	}
+	if user.Code != code {
+		return errors.New("verification code does not match")
+	}
+	if time.Now().After(user.Expiry) {
+		return errors.New("verification code expired")
+	}
+	updater := domain.User{
+		Verified: true,
+	}
+	_, err = s.Repo.UpdateUser(id, updater)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
+
 func (s USerService) CeateProfile(id uint, input any) error {
 	return nil
 }
