@@ -11,6 +11,9 @@ type AppConfig struct {
 	ServerPort string
 	Dsn        string
 	AppSecret  string
+	AccountSid string
+	AuthToken  string
+	Fromphone  string
 }
 
 func SetupEnv() (cfg AppConfig, err error) {
