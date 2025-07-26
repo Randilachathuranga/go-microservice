@@ -85,7 +85,7 @@ func (s USerService) GetverificationCode(e domain.User) error {
 		return err
 	}
 
-	newuser, errs := s.Repo.FindUserById(e.ID)
+	user, errs := s.Repo.FindUserById(e.ID)
 	if err != nil {
 		return errs
 	}
@@ -94,7 +94,7 @@ func (s USerService) GetverificationCode(e domain.User) error {
 
 	msg := fmt.Sprintf("Your verification code is: %s", code)
 
-	err = notificationClient.SendSMS(newuser.Phone, msg)
+	err = notificationClient.SendSMS(user.Phone, msg)
 	if err != nil {
 		return err
 	}
