@@ -82,3 +82,91 @@ func (c *CatalogService) GetCategory(id int) (*domain.Category, error) {
 	}
 	return cat, nil
 }
+
+// products
+func (s CatalogService) CreateProduct(input dto.CreateProductRequest, user domain.User) error {
+	err := s.Repo.CreateProduct(&domain.Product{
+		Name:        input.Name,
+		Description: input.Description,
+		Price:       input.Price,
+		CategoryId:  input.CategoryId,
+		ImageUrl:    input.ImageUrl,
+		UserID:      user.ID,
+		Stock:       input.Stock,
+	})
+	return err
+}
+
+func (s *CatalogService) EditProduct(id int, input dto.CreateProductRequest, user domain.User) (*domain.Product, error) {
+	product, err := s.Repo.FindProductById(id)
+	if err != nil {
+		return nil, errors.New("product not found")
+	}
+
+	if product.UserID != user.ID {
+		return nil, errors.New("user not authorized to edit")
+	}
+
+	// Update fields
+	product.Name = input.Name
+	product.Description = input.Description
+	product.Price = input.Price
+	product.CategoryId = input.CategoryId
+	product.ImageUrl = input.ImageUrl
+	// Save changes
+	if err := s.Repo.EditProduct(product); err != nil {
+		return nil, err
+	}
+	return product, nil
+}
+
+func (s *CatalogService) DeleteProduct(ctx *fiber.Ctx) error {
+	id, err := strconv.Atoi(ctx.Params("id"))
+	if err != nil {
+		return rest.BadRequestError(ctx, "Invalid category ID")
+	}
+	product, err := s.Repo.FindProductById(id)
+	if err != nil {
+		return rest.BadRequestError(ctx, "Product not found")
+	}
+	err = s.Repo.DeleteProduct(product)
+	if err != nil {
+		return rest.InternalError(ctx, err)
+	}
+	return rest.SuccessResponse(ctx, "Product deleted successfully", nil)
+}
+
+func (s *CatalogService) GetProducts() ([]*domain.Product, error) {
+	products, err := s.Repo.FindProducts()
+	if err != nil {
+		return nil, err
+	}
+	return products, err
+}
+func (s *CatalogService) GetProductById(id int) (*domain.Product, error) {
+	product, err := s.Repo.FindProductById(id)
+	if err != nil {
+		return nil, errors.New("Product not found")
+	}
+	return product, nil
+}
+
+func (s *CatalogService) GetSellerProducts() ([]*domain.Product, error) {
+	products, err := s.Repo.FindProducts()
+	if err != nil {
+		return nil, err
+	}
+	return products, err
+}
+
+func (s *CatalogService) UpdateProductStock(e domain.Product) (*domain.Product, error) {
+	product, err := s.Repo.FindProductById(int(e.ID))
+	if err != nil {
+		return nil, errors.New("product not found")
+	}
+	product.Stock = e.Stock
+	if err := s.Repo.EditProduct(product); err != nil {
+		return nil, err
+	}
+	return product, nil
+}

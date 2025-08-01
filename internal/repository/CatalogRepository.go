@@ -28,36 +28,6 @@ type catalogRepository struct {
 	db *gorm.DB
 }
 
-func (r *catalogRepository) CreateProduct(c *domain.Product) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (r *catalogRepository) FindProducts() ([]*domain.Product, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (r *catalogRepository) FindProductById(id int) (*domain.Product, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (r *catalogRepository) FindSellerProducts(id int) ([]*domain.Product, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (r *catalogRepository) EditProduct(c *domain.Product) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (r *catalogRepository) DeleteProduct(c *domain.Product) error {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (r *catalogRepository) CreateCategory(c *domain.Category) error {
 	err := r.db.Create(c).Error
 	fmt.Println(err)
@@ -97,6 +67,55 @@ func (r *catalogRepository) DeleteCategory(c *domain.Category) error {
 	err := r.db.Delete(c).Error
 	if err != nil {
 		return errors.New("delete category failed")
+	}
+	return nil
+}
+
+// products
+func (r *catalogRepository) CreateProduct(c *domain.Product) error {
+	if err := r.db.Model(&domain.Product{}).Create(c).Error; err != nil {
+		return errors.New("create product failed: " + err.Error())
+	}
+	return nil
+}
+
+func (r *catalogRepository) FindProducts() ([]*domain.Product, error) {
+	var products []*domain.Product
+	if err := r.db.Find(&products).Error; err != nil {
+		return nil, errors.New("find products failed: " + err.Error())
+	}
+	return products, nil
+}
+
+func (r *catalogRepository) FindProductById(id int) (*domain.Product, error) {
+	var product domain.Product
+	if err := r.db.First(&product, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("product not found")
+		}
+		return nil, err
+	}
+	return &product, nil
+}
+
+func (r *catalogRepository) FindSellerProducts(sellerId int) ([]*domain.Product, error) {
+	var products []*domain.Product
+	if err := r.db.Where("seller_id = ?", sellerId).Find(&products).Error; err != nil {
+		return nil, errors.New("find seller products failed: " + err.Error())
+	}
+	return products, nil
+}
+
+func (r *catalogRepository) EditProduct(c *domain.Product) error {
+	if err := r.db.Save(c).Error; err != nil {
+		return errors.New("update product failed: " + err.Error())
+	}
+	return nil
+}
+
+func (r *catalogRepository) DeleteProduct(c *domain.Product) error {
+	if err := r.db.Delete(c).Error; err != nil {
+		return errors.New("delete product failed: " + err.Error())
 	}
 	return nil
 }
