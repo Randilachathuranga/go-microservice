@@ -30,12 +30,10 @@ func SetupEnv() (cfg AppConfig, err error) {
 		return AppConfig{}, errors.New("Environment variable HTTP_PORT is not set")
 	}
 	fmt.Println("HTTP_PORT is:", httpPort)
-
 	// Fix: Ensure port format is correct for Fiber
 	if httpPort[0] != ':' {
 		httpPort = ":" + httpPort
 	}
-
 	Dsn := os.Getenv("DSN")
 	if len(Dsn) < 1 {
 		return AppConfig{}, errors.New("Environment variable DSN is not set")
