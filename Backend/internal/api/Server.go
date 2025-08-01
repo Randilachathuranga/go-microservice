@@ -10,12 +10,21 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func StartServer(config Config.AppConfig) {
 	app := fiber.New() // declare a new Fiber app
+
+	// Add CORS middleware
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "http://localhost:3000", // React dev server port
+		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
+		AllowHeaders:     "Origin,Content-Type,Accept,Authorization",
+		AllowCredentials: true,
+	}))
 
 	db, err := gorm.Open(postgres.Open(config.Dsn), &gorm.Config{})
 
