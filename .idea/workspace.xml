@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="d74538cc-5948-44ae-82c9-789eb1d8b2df" name="Changes" comment="Product crud is ok">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/appConfig.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/api/Server.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/api/rest/Handlers/CatalogHandler.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/api/rest/Handlers/TransactionHandaler.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/api/rest/Handlers/UserHandler.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/api/rest/HttpHandler.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/api/rest/Responce.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/domain/BankAccount.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/domain/Category.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/domain/Product.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/domain/User.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/dto/CategoryRequestDTO.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/dto/ProductRequestDTO.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/dto/UserRequestDTO.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/helper/auth.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/helper/utility.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/repository/CatalogRepository.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/repository/UserRepository.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/service/CatalogService.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/service/UserService.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/nodemon.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/Notification/SendSMS.go" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" url="file://$PROJECT_DIR$/../../../../../Program Files/Go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Randilachathuranga&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Randilachathuranga/go-microservice.git&quot;,
+    &quot;accountId&quot;: &quot;6a231037-0a92-4d54-986e-0e7bee289f80&quot;
+  }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="2zzGdeIbd9AmQm9qAOSx5gjJbB5" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.GoLinterPluginOnboarding&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.GoLinterPluginStorageMigration&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/hp&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-gosdk-3b128438d3f6-07d2d2d66b1e-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-251.26927.50" />
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-GO-251.26927.50" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d74538cc-5948-44ae-82c9-789eb1d8b2df" name="Changes" comment="" />
+      <created>1752726577866</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1752726577866</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName=".env" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="main" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="practice go-microservices" />
+    <MESSAGE value="initial restapi handlers is done by go" />
+    <MESSAGE value="request dto and registation api is created" />
+    <MESSAGE value="ADD SOME DOCKER" />
+    <MESSAGE value="login and register is done on docker db" />
+    <MESSAGE value="Authentication and Authorization part is done" />
+    <MESSAGE value="add" />
+    <MESSAGE value="verification code checked" />
+    <MESSAGE value="Products and category tables are created" />
+    <MESSAGE value="Catalog crud is ok" />
+    <MESSAGE value="Product crud is ok" />
+    <option name="LAST_COMMIT_MESSAGE" value="Product crud is ok" />
+  </component>
+  <component name="VgoProject">
+    <settings-migrated>true</settings-migrated>
+  </component>
+</project>
