@@ -15,11 +15,18 @@ type UserRepository interface {
 	DeleteUser(user domain.User) error
 	ViewUser(user domain.User) (domain.User, error)
 	ViewAllUsers() ([]domain.User, error)
+
+	//more function for seller
+	CreateBankAccount(bankAccount domain.BankAccount) (domain.BankAccount, error)
 }
 
 // Private struct
 type userRepository struct {
 	db *gorm.DB
+}
+
+func (r *userRepository) CreateBankAccount(e domain.BankAccount) (domain.BankAccount, error) {
+	return e, r.db.Create(&e).Error
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {

@@ -3,8 +3,9 @@ package Config
 import (
 	"errors"
 	"fmt"
-	"github.com/joho/godotenv"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type AppConfig struct {
@@ -46,5 +47,23 @@ func SetupEnv() (cfg AppConfig, err error) {
 		return AppConfig{}, errors.New("Environment variable APP_SECRET is not set")
 	}
 
-	return AppConfig{httpPort, Dsn, appSecret}, nil
+	accountSid := os.Getenv("ACCOUNT_SID")
+	if len(accountSid) < 1 {
+		accountSid = "default_account_sid" // provide default value
+	}
+	fmt.Println("AccountSid is:", accountSid)
+
+	authToken := os.Getenv("AUTH_TOKEN")
+	if len(authToken) < 1 {
+		authToken = "default_auth_token" // provide default value
+	}
+	fmt.Println("AuthToken is:", authToken)
+
+	fromphone := os.Getenv("FROM_PHONE")
+	if len(fromphone) < 1 {
+		fromphone = "default_phone" // provide default value
+	}
+	fmt.Println("Fromphone is:", fromphone)
+
+	return AppConfig{httpPort, Dsn, appSecret, accountSid, authToken, fromphone}, nil
 }

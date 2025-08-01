@@ -1,12 +1,13 @@
 package Handlers
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"go-ecommerce-app/internal/api/rest"
 	"go-ecommerce-app/internal/dto"
 	"go-ecommerce-app/internal/repository"
 	"go-ecommerce-app/internal/service"
 	"log"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type UserHandelr struct {
@@ -34,7 +35,7 @@ func SetUpuserRoutes(rh *rest.RestHandler) {
 	pubRoutes.Post("/register", handler.Register)
 	pubRoutes.Post("/login", handler.Login)
 
-	pvtRoutes := pubRoutes.Group("/", rh.Auth.Authorize)
+	pvtRoutes := pubRoutes.Group("", rh.Auth.Authorize)
 	//private endpoint
 	pvtRoutes.Get("/verify", handler.GetVerificationCode)
 	pvtRoutes.Post("/verify", handler.Verify)
@@ -179,7 +180,27 @@ func (h *UserHandelr) GetOrders(ctx *fiber.Ctx) error {
 	})
 }
 func (h *UserHandelr) BecomeaSeller(ctx *fiber.Ctx) error {
+
+	user, err := h.svc.Auth.GetCurrentUser(ctx)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{})
+	}
+	//
+	req := dto.SellerInput{}
+	err = ctx.BodyParser(&req)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "please provide valid inputs",
+		})
+	}
+	token, err := h.svc.BecomeSeller(user.ID, req)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "fail to become seller",
+		})
+	}
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "become a seller",
+		"message": "Become seller",
+		"token":   token,
 	})
 }
