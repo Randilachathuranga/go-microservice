@@ -25,7 +25,7 @@ func StartServer(config Config.AppConfig) {
 	fmt.Println("database connection established", db)
 
 	//run the migration
-	err = db.AutoMigrate(&domain.User{}, &domain.BankAccount{})
+	err = db.AutoMigrate(&domain.User{}, &domain.BankAccount{}, &domain.Category{}, &domain.Product{})
 	if err != nil {
 		log.Warnf("Migration warning: %s", err.Error())
 		fmt.Println("Migration completed with warnings - continuing...")

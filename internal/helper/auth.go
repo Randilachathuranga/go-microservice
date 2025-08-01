@@ -176,3 +176,28 @@ func (a Auth) GetCurrentUser(ctx *fiber.Ctx) (domain.User, error) {
 func (a Auth) GenerateCode() (int, error) {
 	return Randomnumbers(6)
 }
+
+// Authorize is a middleware method for authentication
+func (a Auth) AuthorizeSeller(ctx *fiber.Ctx) error {
+	authHeader := ctx.Get("Authorization")
+	if authHeader == "" {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "authorization header is required",
+		})
+	}
+	user, err := a.VerifyToken(authHeader)
+	if err != nil {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "authorization failed",
+			"reason":  err.Error(),
+		})
+	} else if user.ID > 0 && user.USerType == domain.SELLER {
+		ctx.Locals("user", user)
+		return ctx.Next()
+	} else {
+		return ctx.Status(401).JSON(fiber.Map{
+			"message": "invalid user type",
+			"reason":  errors.New("invalid user type in context"),
+		})
+	}
+}

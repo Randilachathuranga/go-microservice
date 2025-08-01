@@ -35,7 +35,7 @@ func SetUpuserRoutes(rh *rest.RestHandler) {
 	pubRoutes.Post("/register", handler.Register)
 	pubRoutes.Post("/login", handler.Login)
 
-	pvtRoutes := pubRoutes.Group("", rh.Auth.Authorize)
+	pvtRoutes := pubRoutes.Group("/", rh.Auth.Authorize)
 	//private endpoint
 	pvtRoutes.Get("/verify", handler.GetVerificationCode)
 	pvtRoutes.Post("/verify", handler.Verify)
