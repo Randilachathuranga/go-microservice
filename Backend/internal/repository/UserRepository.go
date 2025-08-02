@@ -27,6 +27,11 @@ type UserRepository interface {
 	DeleteCartById(id uint) error
 	DeleteCartItems(uId uint) error
 
+	//order
+	CreateOrder(o domain.Order) error
+	FindOrders(uId uint) ([]domain.Order, error)
+	FindOrderByid(id uint, uId uint) (domain.Order, error)
+
 	//profile
 	CreateProfile(e domain.Address) error
 	UpdateProfile(e domain.Address) error
@@ -35,6 +40,23 @@ type UserRepository interface {
 // Private struct
 type userRepository struct {
 	db *gorm.DB
+}
+
+func (r *userRepository) CreateOrder(o domain.Order) error {
+	err := r.db.Create(&o).Error
+	return err
+}
+
+func (r *userRepository) FindOrders(uId uint) ([]domain.Order, error) {
+	var orders []domain.Order
+	err := r.db.Where("user_id = ?", uId).Find(&orders).Error
+	return orders, err
+}
+
+func (r *userRepository) FindOrderByid(id uint, uId uint) (domain.Order, error) {
+	var order domain.Order
+	err := r.db.Preload("items").Where("id=? AND user_id = ?", id, uId).Find(&order).Error
+	return order, err
 }
 
 func (r *userRepository) CreateProfile(e domain.Address) error {

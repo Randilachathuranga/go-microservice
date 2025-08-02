@@ -40,7 +40,10 @@ func StartServer(config Config.AppConfig) {
 		&domain.Category{},
 		&domain.Product{},
 		&domain.Cart{},
-		&domain.Address{})
+		&domain.Address{},
+		&domain.Order{},
+		&domain.OrderItem{},
+	)
 	if err != nil {
 		log.Warnf("Migration warning: %s", err.Error())
 		fmt.Println("Migration completed with warnings - continuing...")

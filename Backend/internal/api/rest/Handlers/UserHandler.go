@@ -7,6 +7,7 @@ import (
 	"go-ecommerce-app/internal/repository"
 	"go-ecommerce-app/internal/service"
 	"log"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -49,6 +50,7 @@ func SetUpuserRoutes(rh *rest.RestHandler) {
 	pvtRoutes.Post("/cart", handler.AddtoCart)
 	pvtRoutes.Get("/cart", handler.GetCart)
 
+	pvtRoutes.Post("/order", handler.CreateOrder)
 	pvtRoutes.Get("/order", handler.GetOrders)
 	pvtRoutes.Get("/order/:id", handler.GetOrder)
 
@@ -240,21 +242,46 @@ func (h *UserHandelr) GetCart(ctx *fiber.Ctx) error {
 	}
 	return rest.SuccessResponse(ctx, "Cart Details", cart)
 }
-func (h *UserHandelr) CreateCart(ctx *fiber.Ctx) error {
+func (h *UserHandelr) CreateOrder(ctx *fiber.Ctx) error {
+
+	user, _ := h.svc.Auth.GetCurrentUser(ctx)
+	orderRef, err := h.svc.CreateOrder(user)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Create cart",
+		"message":  "Order Created",
+		"OrderRef": orderRef,
 	})
 }
 func (h *UserHandelr) GetOrder(ctx *fiber.Ctx) error {
-	orderID := ctx.Params("id") // get the :id parameter from URL
+
+	user, _ := h.svc.Auth.GetCurrentUser(ctx)
+	orderid, _ := strconv.Atoi(ctx.Params("id"))
+
+	order, err := h.svc.GetorderbyID(uint(orderid), user.ID)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Get a order",
-		"orderID": orderID,
+		"orderID": order,
 	})
 }
 func (h *UserHandelr) GetOrders(ctx *fiber.Ctx) error {
+
+	user, _ := h.svc.Auth.GetCurrentUser(ctx)
+	orders, err := h.svc.GetOrders(user)
+	if err != nil {
+		return rest.InternalError(ctx, err)
+	}
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Get orderss",
+		"orders":  orders,
 	})
 }
 func (h *UserHandelr) BecomeaSeller(ctx *fiber.Ctx) error {

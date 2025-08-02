@@ -10,12 +10,14 @@ import (
 	"go-ecommerce-app/internal/repository"
 	"go-ecommerce-app/pkg/Notification"
 	"log"
+	"strconv"
 	"time"
 )
 
 type USerService struct {
-	Repo   repository.UserRepository
-	Crep   repository.CatalogRepository
+	Repo repository.UserRepository
+	Crep repository.CatalogRepository
+
 	Auth   helper.Auth
 	Config Config.AppConfig
 }
@@ -288,12 +290,70 @@ func (s USerService) CreateCart(input dto.CreateCartRequest, u domain.User) (dom
 }
 
 func (s USerService) CreateOrder(u domain.User) (int, error) {
-	return 0, nil
+	//find cart items for user
+	cartItems, err := s.Repo.FindCartItems(u.ID)
+	if err != nil {
+		return 0, errors.New("error getting cart")
+	}
+	if len(cartItems) == 0 {
+		return 0, errors.New("cart is empty and cannot create order")
+	}
+	//find success payment status
+	paymentId := "PAY12345"
+	txnID := "TNX12345"
+	OrderRef, _ := helper.Randomnumbers(8)
+	//create order with generated order number
+	var Amount float32
+	var OrderItem []domain.OrderItem
+
+	for _, item := range cartItems {
+		Amount += item.Price * float32(item.Quantity)
+		OrderItem = append(OrderItem, domain.OrderItem{
+			ProductID: strconv.Itoa(int(item.ProductID)),
+			Qty:       strconv.Itoa(int(item.Quantity)),
+			Price:     float64(item.Price),
+			Name:      item.Name,
+			ImageURL:  item.ImageURL,
+			SellerId:  item.SellerID,
+		})
+	}
+
+	order := domain.Order{
+		UserId:         u.ID,
+		PaymentId:      paymentId,
+		TransactionId:  txnID,
+		OrderRefNumber: uint(OrderRef),
+		Amount:         float64(Amount),
+		Items:          OrderItem,
+	}
+
+	err = s.Repo.CreateOrder(order)
+	if err != nil {
+		return 0, err
+	}
+	//send email to user
+
+	// remove cart items from cart
+	err = s.Repo.DeleteCartItems(u.ID)
+	if err != nil {
+		return 0, errors.New("error deleting cart")
+	}
+	//return order number
+	return OrderRef, nil
 }
-func (s USerService) GetOrders(u domain.User) ([]interface{}, error) {
-	return nil, nil
+func (s USerService) GetOrders(u domain.User) ([]domain.Order, error) {
+	orders, err := s.Repo.FindOrders(u.ID)
+	if err != nil {
+		return nil, errors.New("error getting orders")
+	}
+
+	return orders, nil
 }
 
-func (s USerService) GetorderbyID(id uint, Uid uint) (interface{}, error) {
-	return nil, nil
+func (s USerService) GetorderbyID(id uint, uId uint) (domain.Order, error) {
+	order, err := s.Repo.FindOrderByid(id, uId)
+	if err != nil {
+		return order, errors.New("error getting order")
+	}
+	return order, nil
 }

@@ -10,6 +10,6 @@ type Address struct {
 	PostCode     string    `json:"post_code"`
 	Country      string    `json:"country"`
 	UserId       uint      `json:"user_id"` //one to one
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
