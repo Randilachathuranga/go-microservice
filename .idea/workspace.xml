@@ -4,36 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d74538cc-5948-44ae-82c9-789eb1d8b2df" name="Changes" comment="Product crud is ok">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/appConfig.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/api/Server.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/api/rest/Handlers/CatalogHandler.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/api/rest/Handlers/TransactionHandaler.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/api/rest/Handlers/UserHandler.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/api/rest/HttpHandler.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/api/rest/Responce.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/domain/BankAccount.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/domain/Category.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/domain/Product.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/domain/User.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/dto/CategoryRequestDTO.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/dto/ProductRequestDTO.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/dto/UserRequestDTO.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/helper/auth.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/helper/utility.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/repository/CatalogRepository.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/repository/UserRepository.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/service/CatalogService.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/service/UserService.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/nodemon.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/Notification/SendSMS.go" beforeDir="false" />
-    </list>
+    <list default="true" id="d74538cc-5948-44ae-82c9-789eb1d8b2df" name="Changes" comment="Product crud is ok" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

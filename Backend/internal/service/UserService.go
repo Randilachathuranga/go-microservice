@@ -15,6 +15,7 @@ import (
 
 type USerService struct {
 	Repo   repository.UserRepository
+	Crep   repository.CatalogRepository
 	Auth   helper.Auth
 	Config Config.AppConfig
 }
@@ -130,13 +131,67 @@ func (s USerService) VerifyCode(id uint, code uint) error {
 	return nil
 }
 
-func (s USerService) CeateProfile(id uint, input any) error {
+func (s USerService) CrateProfile(id uint, input dto.ProfileInput) error {
+
+	//update user
+	_, err := s.Repo.UpdateUser(id, domain.User{
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+	})
+	if err != nil {
+		return err
+	}
+	//create the address
+	address := domain.Address{
+		AddressLine1: input.AddressInput.AddressLine1,
+		AddressLine2: input.AddressInput.AddressLine2,
+		City:         input.AddressInput.City,
+		Country:      input.AddressInput.Country,
+		PostCode:     input.AddressInput.PostalCode,
+		UserId:       id,
+	}
+
+	err = s.Repo.CreateProfile(address)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 func (s USerService) GetProfile(id uint) (*domain.User, error) {
-	return nil, nil
+
+	user, err := s.Repo.FindUserById(id)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
-func (s USerService) UpdateProfile(id uint, input any) error {
+func (s USerService) UpdateProfile(id uint, input dto.ProfileInput) error {
+	// Find the existing user
+	user, err := s.Repo.FindUserById(id)
+	if err != nil {
+		return err
+	}
+	// Update the user fields
+	user.FirstName = input.FirstName
+	user.LastName = input.LastName
+	// Save the updated user
+	_, err = s.Repo.UpdateUser(id, user)
+
+	address := domain.Address{
+		AddressLine1: input.AddressInput.AddressLine1,
+		AddressLine2: input.AddressInput.AddressLine2,
+		City:         input.AddressInput.City,
+		Country:      input.AddressInput.Country,
+		PostCode:     input.AddressInput.PostalCode,
+		UserId:       id,
+	}
+
+	err = s.Repo.CreateProfile(address)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -177,12 +232,61 @@ func (s USerService) BecomeSeller(id uint, input dto.SellerInput) (string, error
 
 	return token, nil
 }
-func (s USerService) FindCart(id uint) ([]interface{}, error) {
-	return nil, nil
+func (s USerService) FindCart(id uint) ([]domain.Cart, error) {
+	cartitems, err := s.Repo.FindCartItems(id)
+	return cartitems, err
 }
-func (s USerService) CreateCart(input any, u domain.User) ([]interface{}, error) {
-	return nil, nil
+func (s USerService) CreateCart(input dto.CreateCartRequest, u domain.User) (domain.Cart, error) {
+	// Check if the cart item already exists
+	cart, _ := s.Repo.FindCartItem(u.ID, input.ProductId)
+
+	// Validate product ID
+	if input.ProductId == 0 {
+		return domain.Cart{}, errors.New("invalid product id")
+	}
+
+	if cart.ID > 0 {
+		// Update or delete existing cart item
+		if input.Quantity < 1 {
+			// Delete the cart item
+			err := s.Repo.DeleteCartItems(cart.ID)
+			if err != nil {
+				return domain.Cart{}, errors.New("error deleting cart item")
+			}
+			return domain.Cart{}, nil // Item deleted, return empty cart
+		} else {
+			// Update the quantity
+			cart.Quantity = input.Quantity
+			err := s.Repo.CreateCart(cart) // assuming CreateCart upserts
+			if err != nil {
+				return domain.Cart{}, errors.New("error updating cart")
+			}
+			return cart, nil
+		}
+	} else {
+		//check if product exist
+		product, err := s.Crep.FindProductById(int(input.ProductId))
+		if product.ID < 1 {
+			return domain.Cart{}, errors.New("Not found product")
+		}
+		// Create new cart item
+		newCart := domain.Cart{
+			UserID:    u.ID,
+			ProductID: input.ProductId,
+			Name:      product.Name,
+			ImageURL:  product.ImageUrl,
+			Quantity:  input.Quantity,
+			Price:     float32(product.Price),
+			SellerID:  product.UserID,
+		}
+		err = s.Repo.CreateCart(newCart)
+		if err != nil {
+			return domain.Cart{}, errors.New("error creating new cart item")
+		}
+		return newCart, nil
+	}
 }
+
 func (s USerService) CreateOrder(u domain.User) (int, error) {
 	return 0, nil
 }

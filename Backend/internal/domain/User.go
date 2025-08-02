@@ -17,6 +17,7 @@ type User struct {
 	Password  string    `json:"password"`
 	Code      uint      `json:"code"`
 	Expiry    time.Time `json:"expiry"`
+	Address   Address   `json:"address"` // relation is one to one
 	Verified  bool      `json:"verified" gorm:"default:false"`
 	USerType  string    `json:"user_type" gorm:"default:'buyer'"`
 	CreatedAt time.Time `json:"created_at" gorm:"default:current_timestamp"`

@@ -18,11 +18,81 @@ type UserRepository interface {
 
 	//more function for seller
 	CreateBankAccount(bankAccount domain.BankAccount) (domain.BankAccount, error)
+
+	//cart
+	FindCartItems(uId uint) ([]domain.Cart, error)
+	FindCartItem(uId uint, pId uint) (domain.Cart, error)
+	CreateCart(cart domain.Cart) error
+	UpdateCart(cart domain.Cart) error
+	DeleteCartById(id uint) error
+	DeleteCartItems(uId uint) error
+
+	//profile
+	CreateProfile(e domain.Address) error
+	UpdateProfile(e domain.Address) error
 }
 
 // Private struct
 type userRepository struct {
 	db *gorm.DB
+}
+
+func (r *userRepository) CreateProfile(e domain.Address) error {
+	err := r.db.Create(&e).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *userRepository) UpdateProfile(e domain.Address) error {
+	err := r.db.Where("userId = ?", e.UserId).Updates(&e).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *userRepository) FindCartItems(uId uint) ([]domain.Cart, error) {
+	var carts []domain.Cart
+	err := r.db.Where("user_id = ?", uId).Find(&carts).Error
+	return carts, err
+}
+
+func (r *userRepository) FindCartItem(uId uint, pId uint) (domain.Cart, error) {
+	var carts domain.Cart
+	err := r.db.Where("user_id = ? AND id = ?", uId, pId).Find(&carts).Error
+	return carts, err
+}
+
+func (r *userRepository) CreateCart(cart domain.Cart) error {
+	err := r.db.Create(&cart).Error
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (r *userRepository) UpdateCart(c domain.Cart) error {
+	var cart domain.Cart
+	err := r.db.Model(&cart).Where("id = ?", cart.ID).Updates(&c).Error
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (r *userRepository) DeleteCartById(id uint) error {
+	err := r.db.Where("id = ?", id).Delete(&domain.Cart{}).Error
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (r *userRepository) DeleteCartItems(uId uint) error {
+	err := r.db.Where("user_id = ?", uId).Delete(&domain.Cart{}).Error
+	return err
 }
 
 func (r *userRepository) CreateBankAccount(e domain.BankAccount) (domain.BankAccount, error) {
@@ -54,7 +124,7 @@ func (r *userRepository) FindUserById(userId uint) (domain.User, error) {
 
 func (r *userRepository) FindUserByEmail(email string) (domain.User, error) {
 	var user domain.User
-	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
+	if err := r.db.Where("email = ?", email).Preload("Address").First(&user).Error; err != nil {
 		return domain.User{}, err
 	}
 	return user, nil
