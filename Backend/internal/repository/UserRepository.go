@@ -138,7 +138,10 @@ func (r *userRepository) CreateUser(user domain.User) (domain.User, error) {
 
 func (r *userRepository) FindUserById(userId uint) (domain.User, error) {
 	var user domain.User
-	if err := r.db.First(&user, userId).Error; err != nil {
+	if err := r.db.
+		Preload("Cart").
+		Preload("Order").
+		First(&user, userId).Error; err != nil {
 		return domain.User{}, err
 	}
 	return user, nil

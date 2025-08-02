@@ -18,6 +18,9 @@ type User struct {
 	Code      uint      `json:"code"`
 	Expiry    time.Time `json:"expiry"`
 	Address   Address   `json:"address"` // relation is one to one
+	Cart      Cart      `json:"cart"`    // one user can one cart
+	Order     []Order   `json:"order"`   // one user has multiple orders
+	Payment   []Payment `json:"payment"` // one user to many payment
 	Verified  bool      `json:"verified" gorm:"default:false"`
 	USerType  string    `json:"user_type" gorm:"default:'buyer'"`
 	CreatedAt time.Time `json:"created_at" gorm:"default:current_timestamp"`

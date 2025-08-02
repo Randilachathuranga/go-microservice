@@ -43,6 +43,7 @@ func StartServer(config Config.AppConfig) {
 		&domain.Address{},
 		&domain.Order{},
 		&domain.OrderItem{},
+		&domain.Payment{},
 	)
 	if err != nil {
 		log.Warnf("Migration warning: %s", err.Error())
@@ -72,6 +73,7 @@ func SetupRoutes(rh *rest.RestHandler) {
 	//user handler
 	Handlers.SetUpuserRoutes(rh)
 	//transaction
+	Handlers.SetTransactionRoutes(rh)
 	//catalog
 	Handlers.SetCatalogRoutes(rh)
 }
