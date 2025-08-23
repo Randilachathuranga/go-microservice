@@ -234,9 +234,17 @@ func (s USerService) BecomeSeller(id uint, input dto.SellerInput) (string, error
 
 	return token, nil
 }
-func (s USerService) FindCart(id uint) ([]domain.Cart, error) {
+func (s USerService) FindCart(id uint) ([]domain.Cart, float32, error) {
 	cartitems, err := s.Repo.FindCartItems(id)
-	return cartitems, err
+	if err != nil {
+		return nil, 0, err
+	}
+	var totalAmount float32
+	for _, item := range cartitems {
+		totalAmount += item.Price * (item.Quantity)
+	}
+
+	return cartitems, totalAmount, err
 }
 func (s USerService) CreateCart(input dto.CreateCartRequest, u domain.User) (domain.Cart, error) {
 	// Check if the cart item already exists
@@ -258,7 +266,7 @@ func (s USerService) CreateCart(input dto.CreateCartRequest, u domain.User) (dom
 			return domain.Cart{}, nil // Item deleted, return empty cart
 		} else {
 			// Update the quantity
-			cart.Quantity = input.Quantity
+			cart.Quantity = float32(input.Quantity)
 			err := s.Repo.CreateCart(cart) // assuming CreateCart upserts
 			if err != nil {
 				return domain.Cart{}, errors.New("error updating cart")
@@ -277,7 +285,7 @@ func (s USerService) CreateCart(input dto.CreateCartRequest, u domain.User) (dom
 			ProductID: input.ProductId,
 			Name:      product.Name,
 			ImageURL:  product.ImageUrl,
-			Quantity:  input.Quantity,
+			Quantity:  float32(input.Quantity),
 			Price:     float32(product.Price),
 			SellerID:  product.UserID,
 		}
@@ -291,7 +299,7 @@ func (s USerService) CreateCart(input dto.CreateCartRequest, u domain.User) (dom
 
 func (s USerService) CreateOrder(u domain.User) (int, error) {
 	//find cart items for user
-	cartItems, err := s.Repo.FindCartItems(u.ID)
+	cartItems, Amount, err := s.FindCart(u.ID)
 	if err != nil {
 		return 0, errors.New("error getting cart")
 	}
@@ -301,13 +309,19 @@ func (s USerService) CreateOrder(u domain.User) (int, error) {
 	//find success payment status
 	paymentId := "PAY12345"
 	txnID := "TNX12345"
-	OrderRef, _ := helper.Randomnumbers(8)
+	orderRefStr, err := helper.Randomnumbers(8)
+	if err != nil {
+		return 0, errors.New("error generating order reference")
+	}
+	parsedRef, err := strconv.ParseUint(orderRefStr, 10, 64)
+	if err != nil {
+		return 0, errors.New("invalid order reference generated")
+	}
+	OrderRef := int(parsedRef)
 	//create order with generated order number
-	var Amount float32
 	var OrderItem []domain.OrderItem
 
 	for _, item := range cartItems {
-		Amount += item.Price * float32(item.Quantity)
 		OrderItem = append(OrderItem, domain.OrderItem{
 			ProductID: strconv.Itoa(int(item.ProductID)),
 			Qty:       strconv.Itoa(int(item.Quantity)),

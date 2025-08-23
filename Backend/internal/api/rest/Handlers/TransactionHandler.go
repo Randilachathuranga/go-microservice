@@ -1,171 +1,165 @@
 package Handlers
 
 import (
-	"strconv"
-
+	"encoding/json"
+	"errors"
+	"go-ecommerce-app/Config"
 	"go-ecommerce-app/internal/api/rest"
-	"go-ecommerce-app/internal/domain"
 	"go-ecommerce-app/internal/helper"
 	"go-ecommerce-app/internal/repository"
 	"go-ecommerce-app/internal/service"
+	payment "go-ecommerce-app/pkg/Payment"
+	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
 type TransactionHandler struct {
-	svc  service.TransactionService
-	auth helper.Auth
+	Svc           service.TransactionService
+	UserSvc       service.USerService
+	PaymentClient payment.PaymentClient
+	Config        Config.AppConfig
 }
 
-func InitializeTransactionService(db *gorm.DB, auth helper.Auth) service.TransactionService {
-	repo := repository.NewTransactionRepository(db)
-	return service.NewTransactionService(repo, auth)
+// initialize service
+func initializeTransactionService(db *gorm.DB, auth helper.Auth) service.TransactionService {
+	return service.NewTransactionService(repository.NewTransactionRepository(db), auth)
 }
 
-func SetTransactionRoutes(as *rest.RestHandler) {
+// setup routes
+func SetupTransactionRoutes(as *rest.RestHandler) {
 	app := as.App
-	svc := InitializeTransactionService(as.DB, as.Auth)
+	svc := initializeTransactionService(as.DB, as.Auth)
 
-	handler := TransactionHandler{
-		svc:  svc,
-		auth: as.Auth,
+	useSvc := service.USerService{
+		Repo:   repository.NewUserRepository(as.DB),
+		Crep:   repository.NewCatalogRepository(as.DB),
+		Auth:   as.Auth,
+		Config: as.Config,
 	}
 
-	secRoute := app.Group("/", as.Auth.Authorize)
-	secRoute.Post("/payment", handler.MakePayment)
+	handler := TransactionHandler{
+		Svc:           svc,
+		PaymentClient: as.Pc,
+		UserSvc:       useSvc,
+		Config:        as.Config,
+	}
 
-	sellerRoute := app.Group("/seller", as.Auth.Authorize)
+	// buyer routes
+	secRoute := app.Group("/buyer", as.Auth.Authorize)
+	secRoute.Get("/payment", handler.MakePayment)
+	secRoute.Get("/verify", handler.VerifyPayment)
+
+	// seller routes
+	sellerRoute := app.Group("/seller", as.Auth.AuthorizeSeller)
 	sellerRoute.Get("/orders", handler.GetOrders)
 	sellerRoute.Get("/orders/:id", handler.GetOrderDetails)
 }
 
+// ========== HANDLERS ==========
+
+// create payment
 func (h *TransactionHandler) MakePayment(ctx *fiber.Ctx) error {
-	// Get current user from context
-	user, err := h.auth.GetCurrentUser(ctx)
+	// 1. grab authorized user
+	user, err := h.UserSvc.Auth.GetCurrentUser(ctx)
 	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": "unauthorized",
-			"error":   err.Error(),
+		return rest.InternalError(ctx, err)
+	}
+	// public key isn't present in AppConfig; use Stripe public key if needed from Config (field StripeSecret exists)
+	pubKey := h.Config.StripeSecret
+
+	// 2. check active payment session
+	activePayment, err := h.Svc.GetActivePayment(user.ID)
+	if activePayment != nil && activePayment.ID > 0 {
+		return ctx.Status(http.StatusOK).JSON(&fiber.Map{
+			"message": "create payment",
+			"pubKey":  pubKey,
+			"secret":  activePayment.PaymentId,
 		})
 	}
 
-	// Parse payment request
-	var paymentRequest struct {
-		Amount        float64 `json:"amount" validate:"required,min=0.01"`
-		CaptureMethod string  `json:"capture_method" validate:"required"`
-		CustomerId    uint    `json:"customer_id" validate:"required"`
-		TransactionId uint    `json:"transaction_id" validate:"required"`
+	// 3. get cart total
+	_, amount, err := h.UserSvc.FindCart(user.ID)
+	if err != nil {
+		return rest.InternalError(ctx, err)
 	}
 
-	if err := ctx.BodyParser(&paymentRequest); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "invalid request body",
-			"error":   err.Error(),
-		})
+	// generate orderId
+	orderId, err := helper.Randomnumbers(8)
+	if err != nil {
+		return rest.InternalError(ctx, errors.New("error generating order id"))
 	}
 
-	// Validate required fields
-	if paymentRequest.Amount <= 0 {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "amount must be greater than 0",
-		})
+	// 4. create new payment session
+	paymentResult, err := h.PaymentClient.CreatePayment(float64(amount), user.ID, orderId)
+	if err != nil {
+		return rest.InternalError(ctx, err)
 	}
 
-	if paymentRequest.CaptureMethod == "" {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "capture method is required",
-		})
+	// 5. store payment in db
+	// Store session using service method signature
+	err = h.Svc.StoreCreatedPayment(user.ID, paymentResult, amount)
+	if err != nil {
+		return ctx.Status(400).JSON(err)
 	}
 
-	// Create payment object
-	payment := &domain.Payment{
-		UserId:        user.ID,
-		Amount:        paymentRequest.Amount,
-		CaptureMethod: paymentRequest.CaptureMethod,
-		CustomerId:    paymentRequest.CustomerId,
-		TransactionId: paymentRequest.TransactionId,
-		Status:        "pending",
-		Response:      "",
-	}
-
-	// Process payment through service
-	if err := h.svc.CreatePayment(payment); err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "failed to process payment",
-			"error":   err.Error(),
-		})
-	}
-
-	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message":    "payment processed successfully",
-		"payment_id": payment.ID,
-		"status":     payment.Status,
+	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
+		"message": "create payment",
+		"pubKey":  pubKey,
+		"secret":  paymentResult.ID,
 	})
 }
 
+// verify payment
+func (h *TransactionHandler) VerifyPayment(ctx *fiber.Ctx) error {
+	user, err := h.UserSvc.Auth.GetCurrentUser(ctx)
+	if err != nil {
+		return rest.InternalError(ctx, err)
+	}
+
+	// check active payment
+	activePayment, err := h.Svc.GetActivePayment(user.ID)
+	if err != nil || activePayment.ID == 0 {
+		return ctx.Status(400).JSON(errors.New("no active payment exist"))
+	}
+
+	// fetch status from provider
+	paymentRes, err := h.PaymentClient.GetPaymentStatus(activePayment.PaymentId)
+	if err != nil {
+		return rest.InternalError(ctx, err)
+	}
+
+	paymentJson, _ := json.Marshal(paymentRes)
+	paymentLogs := string(paymentJson)
+	paymentStatus := "failed"
+
+	// success → create order
+	if paymentRes.Status == "succeeded" {
+		paymentStatus = "success"
+		// Create order using the user service; CreateOrder expects a domain.User
+		_, err = h.UserSvc.CreateOrder(user)
+	}
+
+	if err != nil {
+		return rest.InternalError(ctx, err)
+	}
+
+	// update status
+	h.Svc.UpdatePayment(user.ID, paymentStatus, paymentLogs)
+
+	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
+		"message":  "verify payment",
+		"response": paymentRes,
+	})
+}
+
+// get all orders (seller)
 func (h *TransactionHandler) GetOrders(ctx *fiber.Ctx) error {
-	// Get current user from context
-	user, err := h.auth.GetCurrentUser(ctx)
-	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": "unauthorized",
-			"error":   err.Error(),
-		})
-	}
-
-	// Get orders from service
-	orders, err := h.svc.GetOrders(user)
-	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "failed to retrieve orders",
-			"error":   err.Error(),
-		})
-	}
-
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "orders retrieved successfully",
-		"data":    orders,
-		"count":   len(orders),
-	})
+	return ctx.Status(200).JSON("success")
 }
+
+// get order details (seller)
 func (h *TransactionHandler) GetOrderDetails(ctx *fiber.Ctx) error {
-	// Get current user from context
-	user, err := h.auth.GetCurrentUser(ctx)
-	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": "unauthorized",
-			"error":   err.Error(),
-		})
-	}
-
-	// Parse order ID from URL params
-	orderIdParam := ctx.Params("id")
-	if orderIdParam == "" {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "order ID is required",
-		})
-	}
-
-	orderID, err := strconv.ParseUint(orderIdParam, 10, 32)
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "invalid order ID format",
-			"error":   err.Error(),
-		})
-	}
-
-	// Get order details from service
-	orderDetails, err := h.svc.GetOrderDetails(user, uint(orderID))
-	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "failed to retrieve order details",
-			"error":   err.Error(),
-		})
-	}
-
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "order details retrieved successfully",
-		"data":    orderDetails,
-	})
+	return ctx.Status(200).JSON("success")
 }

@@ -7,6 +7,7 @@ import (
 	"go-ecommerce-app/internal/api/rest/Handlers"
 	"go-ecommerce-app/internal/domain"
 	"go-ecommerce-app/internal/helper"
+	"go-ecommerce-app/pkg/Payment"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
@@ -54,11 +55,13 @@ func StartServer(config Config.AppConfig) {
 
 	auth := helper.SetupAuth(config.AppSecret)
 
+	paymentClient := Payment.NewPaymentClient(config.StripeSecret, config.SuccessUrl, config.CancelUrl)
 	rh := &rest.RestHandler{
 		App:    app,
 		DB:     db,
 		Auth:   auth,
 		Config: config,
+		Pc:     paymentClient,
 	}
 
 	SetupRoutes(rh)
@@ -76,4 +79,6 @@ func SetupRoutes(rh *rest.RestHandler) {
 	Handlers.SetTransactionRoutes(rh)
 	//catalog
 	Handlers.SetCatalogRoutes(rh)
+	// compatibility routes for frontend expectations
+	Handlers.SetupCompatibilityRoutes(rh)
 }

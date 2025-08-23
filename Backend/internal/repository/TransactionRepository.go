@@ -13,11 +13,19 @@ type TransactionRepository interface {
 	CreatePayment(payment *domain.Payment) error
 	FindOrders(uId uint) ([]domain.OrderItem, error)
 	FindOrderById(uId uint, id uint) (dto.SellerOrderDetails, error)
+	FindPayment(uID uint) (*domain.Payment, error)
+	UpdatePaymentStatus(uID uint, status string, logs string) error
 }
 
 // Implementation
 type transactionStorage struct {
 	db *gorm.DB
+}
+
+func (r *transactionStorage) FindPayment(uID uint) (*domain.Payment, error) {
+	var payment *domain.Payment
+	err := r.db.First(&payment, "user_id=? AND status=?", uID, "initial").Order("created_at desc").Error
+	return payment, err
 }
 
 func (r *transactionStorage) CreatePayment(payment *domain.Payment) error {
@@ -82,6 +90,21 @@ func (r *transactionStorage) FindOrderById(uId uint, id uint) (dto.SellerOrderDe
 	}
 
 	return details, nil
+}
+
+func (r *transactionStorage) UpdatePaymentStatus(uID uint, status string, logs string) error {
+	if uID == 0 {
+		return errors.New("invalid user id")
+	}
+	// find the latest payment in initial/pending statuses
+	var p domain.Payment
+	err := r.db.Where("user_id = ?", uID).Order("created_at desc").First(&p).Error
+	if err != nil {
+		return err
+	}
+	p.Status = domain.PaymentStatus(status)
+	p.Response = logs
+	return r.db.Save(&p).Error
 }
 
 // Constructor

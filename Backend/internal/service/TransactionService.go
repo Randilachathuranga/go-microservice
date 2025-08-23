@@ -2,10 +2,13 @@ package service
 
 import (
 	"errors"
+
 	"go-ecommerce-app/internal/domain"
 	"go-ecommerce-app/internal/dto"
 	"go-ecommerce-app/internal/helper"
 	"go-ecommerce-app/internal/repository"
+
+	"github.com/stripe/stripe-go/v78"
 )
 
 // TransactionService defines the business logic for transactions.
@@ -13,6 +16,9 @@ type TransactionService interface {
 	CreatePayment(payment *domain.Payment) error
 	GetOrders(user domain.User) ([]domain.OrderItem, error)
 	GetOrderDetails(user domain.User, orderID uint) (dto.SellerOrderDetails, error)
+	GetActivePayment(userID uint) (*domain.Payment, error)
+	StoreCreatedPayment(userID uint, ps *stripe.PaymentIntent, amount float32) error
+	UpdatePayment(userID uint, status string, logs string) error
 }
 
 // transactionService is the implementation of the TransactionService interface.
@@ -44,7 +50,7 @@ func (s *transactionService) CreatePayment(payment *domain.Payment) error {
 
 	// Set default status if not provided
 	if payment.Status == "" {
-		payment.Status = "pending"
+		payment.Status = domain.PaymentStatusInitial
 	}
 
 	return s.Repo.CreatePayment(payment)
@@ -64,6 +70,34 @@ func (s *transactionService) GetOrders(user domain.User) ([]domain.OrderItem, er
 	return orders, nil
 }
 
+// GetActivePayment retrieves the most recent active payment for a given user.
+func (s *transactionService) GetActivePayment(userID uint) (*domain.Payment, error) {
+	if userID == 0 {
+		return nil, errors.New("invalid user ID")
+	}
+	return s.Repo.FindPayment(userID)
+}
+
+// StoreCreatedPayment saves a Stripe PaymentIntent as a payment record.
+func (s *transactionService) StoreCreatedPayment(userID uint, ps *stripe.PaymentIntent, amount float32) error {
+	if userID == 0 {
+		return errors.New("invalid user ID")
+	}
+	if ps == nil {
+		return errors.New("payment intent cannot be nil")
+	}
+
+	payment := domain.Payment{
+		UserId:    userID,
+		Amount:    float64(amount),
+		Status:    domain.PaymentStatusInitial,
+		PaymentId: ps.ID,
+		Response:  "",
+	}
+
+	return s.Repo.CreatePayment(&payment)
+}
+
 // GetOrderDetails retrieves a specific order by ID for the given user.
 func (s *transactionService) GetOrderDetails(user domain.User, orderID uint) (dto.SellerOrderDetails, error) {
 	if user.ID == 0 {
@@ -79,4 +113,12 @@ func (s *transactionService) GetOrderDetails(user domain.User, orderID uint) (dt
 	}
 
 	return order, nil
+}
+
+// UpdatePayment updates the payment status and response logs for a user's active payment
+func (s *transactionService) UpdatePayment(userID uint, status string, logs string) error {
+	if userID == 0 {
+		return errors.New("invalid user id")
+	}
+	return s.Repo.UpdatePaymentStatus(userID, status, logs)
 }
