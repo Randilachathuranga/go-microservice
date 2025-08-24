@@ -5,19 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d74538cc-5948-44ae-82c9-789eb1d8b2df" name="Changes" comment="Product crud is ok">
-      <change afterPath="$PROJECT_DIR$/Backend/pkg/Payment/Stripe.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/Config/appConfig.go" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/Config/appConfig.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Backend/internal/api/Server.go" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/internal/api/Server.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/internal/api/rest/Handlers/TransactionHandler.go" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/internal/api/rest/Handlers/TransactionHandler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/internal/api/rest/Handlers/UserHandler.go" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/internal/api/rest/Handlers/UserHandler.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Backend/internal/api/rest/HttpHandler.go" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/internal/api/rest/HttpHandler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/internal/domain/Cart.go" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/internal/domain/Cart.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/internal/domain/Payment.go" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/internal/domain/Payment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/internal/helper/utility.go" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/internal/helper/utility.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/internal/repository/TransactionRepository.go" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/internal/repository/TransactionRepository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/internal/service/TransactionService.go" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/internal/service/TransactionService.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/internal/service/UserService.go" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/internal/service/UserService.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/internal/helper/auth.go" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/internal/helper/auth.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

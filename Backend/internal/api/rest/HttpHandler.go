@@ -13,5 +13,5 @@ type RestHandler struct {
 	DB     *gorm.DB
 	Auth   helper.Auth
 	Config Config.AppConfig
-	Pc     Payment.PaymentClient
+	Pc     payment.PaymentClient
 }

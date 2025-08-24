@@ -234,12 +234,7 @@ func (h *UserHandelr) AddtoCart(ctx *fiber.Ctx) error {
 func (h *UserHandelr) GetCart(ctx *fiber.Ctx) error {
 
 	user, _ := h.svc.Auth.GetCurrentUser(ctx)
-	cart, err := h.svc.FindCart(user.ID)
-	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
+	cart, _, _ := h.svc.FindCart(user.ID)
 	return rest.SuccessResponse(ctx, "Cart Details", cart)
 }
 func (h *UserHandelr) CreateOrder(ctx *fiber.Ctx) error {

@@ -55,7 +55,7 @@ func StartServer(config Config.AppConfig) {
 
 	auth := helper.SetupAuth(config.AppSecret)
 
-	paymentClient := Payment.NewPaymentClient(config.StripeSecret, config.SuccessUrl, config.CancelUrl)
+	paymentClient := payment.NewPaymentClient(config.StripeSecret)
 	rh := &rest.RestHandler{
 		App:    app,
 		DB:     db,
@@ -76,7 +76,7 @@ func SetupRoutes(rh *rest.RestHandler) {
 	//user handler
 	Handlers.SetUpuserRoutes(rh)
 	//transaction
-	Handlers.SetTransactionRoutes(rh)
+	Handlers.SetupTransactionRoutes(rh)
 	//catalog
 	Handlers.SetCatalogRoutes(rh)
 	// compatibility routes for frontend expectations

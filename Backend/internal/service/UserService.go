@@ -81,7 +81,7 @@ func (s USerService) GetverificationCode(e domain.User) error {
 	//update user
 	user := domain.User{
 		Expiry: time.Now().Add(30 * time.Minute),
-		Code:   uint(code),
+		Code:   string(code),
 	}
 	_, err = s.Repo.UpdateUser(e.ID, user)
 	if err != nil {
@@ -106,7 +106,7 @@ func (s USerService) GetverificationCode(e domain.User) error {
 	return nil
 }
 
-func (s USerService) VerifyCode(id uint, code uint) error {
+func (s USerService) VerifyCode(id uint, code string) error {
 	if s.isverifiedUser(id) {
 		log.Println("verified ...")
 		return errors.New("verification code already used")
